@@ -1,0 +1,271 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<style>
+h1 {
+  	color: black;
+	position: absolute;
+  width: 520px;
+  height: 50px;
+  z-index: 15;
+  top: 20%;
+  left: 45%;
+  margin: -100px 0 0 -150px;
+  background: red;
+        border: 3px solid black;
+    border-radius: 10px;
+    padding: 5px;
+    width: 525px;
+}
+
+#outPopUp {
+  position: absolute;
+  width: 410px;
+  height: 500px;
+  z-index: 15;
+  top: 31%;
+  left: 50%;
+  margin: -100px 0 0 -150px;
+  background: grey;
+      border: 3px solid blue;
+    border-radius: 10px;
+    padding: 5px;
+    width: 410px;
+}
+
+#align {
+  position: relative;
+  width: 350px;
+  height: 320px;
+  z-index: 15;
+  top: 30%;
+  left: 50%;
+  margin: -130px 0 0 -170px;
+
+}
+</style>
+
+<title>Average Daily Insolation Calculator</title>
+<script type="text/javascript">
+
+var globalBool = true;
+
+function dateToDayNum(x){
+	var a = 0;
+	var m = parseInt(x[x.selectedIndex].value);
+	var d = parseInt(document.getElementById('dates').value);
+	switch(m){
+		case 1:
+		    a = d;
+		    break;
+		case 2:
+		    a = d + 31;
+		    break;
+		case 3:
+		    a = d + 59;
+		    break;
+		case 4:
+		    a = d + 90;
+		    break;
+		case 5:
+		    a = d + 120;
+		    break;
+		case 6:
+		    a = d + 151;
+		    break;
+		case 7:
+		    a = d + 181;
+		    break;
+		case 8:
+		    a = d + 212;
+		    break;
+		case 9:
+		    a = d + 243;
+		    break;
+		case 10:
+		    a = d + 273;
+		    break;
+		case 11:
+		    a = d + 304;
+		    break;
+		case 12:
+		    a = d + 334;
+		    break;
+		default:
+		    a = d + 31;
+	}
+	document.getElementById("theDays").value = a;
+	return a;
+
+}
+
+function toRadians (angle) {
+  return angle * (Math.PI / 180);
+}
+
+function toDegrees (angle) {
+  return angle * (180 / Math.PI);
+}
+
+function roundedToFixed(_float, _digits){
+  var rounder = Math.pow(10, _digits);
+  return (Math.round(_float * rounder) / rounder).toFixed(_digits);
+}
+
+function calculations(){
+	var L,sigma,Ih,delta,sigma,Hsr,Io,Kt,otherCalc,Idh,Idc,Irc,Ibh,Hsrc,Rb,Ibc,Ic;
+	var m,Hsr2;
+
+	if (globalBool == true){
+		actualDays = dateToDayNum(month);
+	}else{
+		actualDays = document.getElementById("theDays").value;
+	}
+	
+
+  	degL = document.getElementById('siteLatitude').value;
+  	L = toRadians(degL);
+  	degSigma =  document.getElementById('collectorAngle').value;
+  	sigma = toRadians(degSigma);
+  	Ih = document.getElementById('horizontal').value;
+  	LMinusTilt = degL - degSigma;
+  	LMinusTilt = toRadians(LMinusTilt);
+
+
+ 	m = (360/365)*(actualDays-81);
+ 	m = toRadians(m);
+ 	delta = 23.45 * Math.sin(m);
+ 	delta = toRadians(delta);
+	Hsr = Math.acos(-1*Math.tan(L)*Math.tan(delta));
+  	Io = (24/Math.PI)*1.37*(1 + 0.034*Math.cos(toRadians(360*actualDays/365)))*(Math.cos(L)*Math.cos(delta)*Math.sin(Hsr)+Hsr*Math.sin(L)*Math.sin(delta));
+  	Kt = Ih/Io;
+  	otherCalc = 1.390 - 4.027*Kt + 5.531*Math.pow(Kt,2) -3.108*Math.pow(Kt,3);
+
+  	Idh = otherCalc * Ih;
+  	Idc = Idh*((1+Math.cos(sigma))/2);
+  	Irc = 0.2 * Ih *((1-Math.cos(sigma))/2);
+  	Ibh = Ih - Idh;
+
+  	Hsr2 = Math.acos(-1*Math.tan(LMinusTilt)*Math.tan(delta))
+  	HsrRad = toRadians(Hsr);
+
+  	Hsrc = Math.min(Hsr,Hsr2);
+  	HsrcRad = toRadians(Hsrc);
+
+  	Rb = ((Math.cos(LMinusTilt)*Math.cos(delta)*Math.sin(Hsrc)+Hsrc*Math.sin(LMinusTilt)*Math.sin(delta)))/((Math.cos(L)*Math.cos(delta)*Math.sin(Hsr)+Hsr*Math.sin(L)*Math.sin(delta)));
+  	Ibc = Ibh*Rb;
+  	Ic = Ibc + Idc + Irc;
+
+  	//document.getElementById("answer").innerHTML =  roundedToFixed(Ic,6) ;
+  	document.getElementsByName('output')[0].value = roundedToFixed(Ic,6) ;
+  	//document.getElementById("b").innerHTML = actualDays;
+  	//document.getElementById("c").innerHTML = sigma;
+  	//document.getElementById("d").innerHTML = roundedToFixed(Ic,6);
+  	//document.getElementById("e").innerHTML = Rb;
+  	//document.getElementById("f").innerHTML = Hsrc;
+  	//document.getElementById("g").innerHTML = Ibc;
+  	//document.getElementById("h").innerHTML = Hsr;
+
+}
+function hideA()
+
+{
+
+    document.getElementById("dates").removeAttribute("disabled");
+    document.getElementById("month").removeAttribute("disabled");   
+    document.getElementById("theDays").setAttribute("disabled",true);    
+ 	globalBool = true;
+ 	document.getElementById("align").reset();
+}
+
+function hideB()
+{
+  	document.getElementById("month").setAttribute("disabled",true);
+    document.getElementById("dates").setAttribute("disabled",true); 
+    document.getElementById("theDays").removeAttribute("disabled");    
+    globalBool = false;
+    document.getElementById("align").reset();
+
+}
+
+function clr(){
+	document.getElementById("answer").innerHTML ="afadf";
+}
+</script>
+</head>
+
+<body>
+<h1>Average Daily Insolation Calculator</h1>
+<div id="outPopUp">
+
+<form id="align">
+<label><font size="5">Choose one of the following inputs:</font></label>
+<br><br>
+<button type="button" name="g" onclick="hideA()">Date</button> or
+<button type="button" name="s" onclick="hideB()"> Number of Days</button>
+<img src= "https://cdn.pixabay.com/photo/2013/07/12/13/51/sun-147426_960_720.png" alt = "sun-147426_960_720.png" style= "float: right;width: 130px;height: 130px;">
+<br><br>
+Select Date: <br>
+<select name="month" id="month" onchange="dateToDayNum(this)">
+<option value="0" selected>Select</option>
+<option value="1">January</option>
+<option value="2">February</option>
+<option value="3">March</option>
+<option value="4">April</option>
+<option value="5">May</option>
+<option value="6">June</option>
+<option value="7">July</option>
+<option value="8">August</option>
+<option value="9">September</option>
+<option value="10">October</option>
+<option value="11">November</option>
+<option value="12">December</option>
+</select>
+<input type="number" id="dates" min = "1" max = "31" size="3" onchange="dateToDayNum()"><br><br>
+	Enter Day Number (n):<br>
+	<input type="number" id="theDays" min = "1" max = "365" disabled="true"> <span style="margin-left:1px;">days</span>
+<br><br>
+	Horizontal Insolaton at date and time above (IH):<br>
+    <input type="number" step="any" id="horizontal"> <span style="margin-left:1px;">kWh/m^2-day</span>
+<br><br>
+	Latitude of the site (L):<br>
+	<input type="number" step="any" id="siteLatitude" min = "0" max = "360"> <span style="margin-left:1px;">degrees</span>
+<br><br>
+	Collector Tilt Angle (Sigma):<br>
+    <input type="number" step="any" id="collectorAngle" > <span style="margin-left:1px;">degrees</span>
+<br><br>
+	<button type="button" onclick="calculations()">Calculate</button>
+	<button type="reset" value="Reset" onclick="">Reset</button>
+
+<br>
+	<LABEL><font color="Yellow"><font size="6">Average Daily Insolation </font></font></LABEL>
+	<br>
+	<input type="textbox" name="output" style="font-size: 18pt" size="12"></input><label><font size = "5"> kWh/m^2-day </font></label>
+	<br>
+<!-- 	<LABEL>DAYS = </LABEL>
+	<label id="b"></label>
+	<br>
+	<LABEL>collector angle = </LABEL>
+	<label id="c"></label>
+	<br>
+	<LABEL>Ih = </LABEL>
+	<label id="d"></label>
+	<br>
+	<LABEL>Rb = </LABEL>
+	<label id="e"></label>
+	<br>
+	<LABEL>Hsrc = </LABEL>
+	<label id="f"></label>
+	<br>
+	<LABEL>Ibc = </LABEL>
+	<label id="g"></label>
+	<br>
+	<LABEL>Hsr = </LABEL>
+	<label id="h"></label> -->
+</form>
+
+</div>
+
+</body>
+</html>
